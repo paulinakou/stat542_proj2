@@ -61,7 +61,7 @@ predict2 <- function(){
         #arma_forecast <- forecast(arma_fit,h=horizon)
         pred = as.numeric(fc$mean)
         id = which(test$Store==j-1 & test$Dept==d & 12==as.numeric(format(test$Date,"%m")) & 2012==as.numeric(format(test$Date,"%Y")))
-        test[id,"Weekly_Pred2"]<<-pred
+        test[id,"Weekly_Pred3"]<<-pred
         #test[id,"Weekly_Pred3"]<-pred
         #test[id,"Weekly_Pred3"]
       }
