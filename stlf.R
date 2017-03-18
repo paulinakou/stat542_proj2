@@ -57,10 +57,10 @@ predict2 <- function(){
       horizon = length(unique(test[which(month==as.numeric(format(test$Date,"%m")) & year==as.numeric(format(test$Date,"%Y"))),"Date"]))  # number of steps ahead to forecast
       for(j in 2:ncol(tr.d)){ # loop over stores
         s = ts(tr.d[, j], frequency = 52)  # convert sales to time series. 
-        #fc = stlf(s, h=horizon, s.window=3, method='arima', ic='bic')
-        arma_fit <- auto.arima(s)
-        arma_forecast <- forecast(arma_fit,h=horizon)
-        pred = as.numeric(arma_forecast$mean)
+        fc = stlf(s, h=horizon, s.window=3, method='arima', ic='bic')
+        #arma_fit <- auto.arima(s)
+        #arma_forecast <- forecast(arma_fit,h=horizon)
+        pred = as.numeric(fc$mean)
         id = which(test$Store==j-1 & test$Dept==d & 12==as.numeric(format(test$Date,"%m")) & 2012==as.numeric(format(test$Date,"%Y")))
         test[id,"Weekly_Pred2"]<<-pred
         #test[id,"Weekly_Pred3"]<-pred
