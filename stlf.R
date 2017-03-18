@@ -1,7 +1,5 @@
 #Walmart data
 
-#change Date from factor class to date class
-
 predict2 <- function(){
   train$Date = as.Date(train$Date, '%Y-%m-%d')
   test$Date = as.Date(test$Date, '%Y-%m-%d')
@@ -39,7 +37,7 @@ predict2 <- function(){
       train[, 2:ncol(train)] = z$u %*% s %*% t(z$v)
     }
     
-    for(d in 1:99){  # first department
+    for(d in 1:99){  # loop over departments
       tr.d = train.frame
       tr.d = join(tr.d, train[train$Dept==d, c('Store','Date','Weekly_Sales')])  # perform a left join.
       tr.d = cast(tr.d, Date ~ Store)  # row is Date, col is Store, entries are the sales
@@ -54,6 +52,7 @@ predict2 <- function(){
       fc.d$Weekly_Sales = 0
       fc.d = cast(fc.d, Date ~ Store)  # similar as tr.d
       
+      # determine how many Fridays in month
       horizon = length(unique(test[which(month==as.numeric(format(test$Date,"%m")) & year==as.numeric(format(test$Date,"%Y"))),"Date"]))  # number of steps ahead to forecast
       for(j in 2:ncol(tr.d)){ # loop over stores
         s = ts(tr.d[, j], frequency = 52)  # convert sales to time series. 
