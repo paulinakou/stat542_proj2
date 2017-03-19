@@ -1,6 +1,6 @@
 #Walmart data
 
-predict_arima <- function(){
+pred2 <- function(){
   #change Date from factor class to date class
   train$Date = as.Date(train$Date, '%Y-%m-%d')
   test$Date = as.Date(test$Date, '%Y-%m-%d')
