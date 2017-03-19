@@ -23,7 +23,6 @@ predict3 <- function(){
   fit <- setDT(temp)[, list(AR = list(auto.arima(Weekly_Sales))), by = .(Store,Dept)]
   
   for (s in 1:n.store){
-    cat("Store: ", store[s], "\n")
     for (d in 1:n.dept){
       if(sum(train$Dept==dept[d] & train$Store==store[s])!=0){
 
