@@ -1,6 +1,6 @@
 #Walmart data
 
-pred2 <- function(){
+predict3 <- function(){
   #change Date from factor class to date class
   train$Date = as.Date(train$Date, '%Y-%m-%d')
   test$Date = as.Date(test$Date, '%Y-%m-%d')
