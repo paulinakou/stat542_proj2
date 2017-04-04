@@ -1,9 +1,8 @@
 #Walmart data
+library(data.table)
+library(forecast)
 
 predict3 <- function(){
-  #change Date from factor class to date class
-  train$Date = as.Date(train$Date, '%Y-%m-%d')
-  test$Date = as.Date(test$Date, '%Y-%m-%d')
   
   store = sort(unique(train$Store))
   n.store = length(store)
@@ -19,10 +18,11 @@ predict3 <- function(){
     year=2012
   }
   
-  temp <-train
+  temp <-train[,1:5]
   fit <- setDT(temp)[, list(AR = list(auto.arima(Weekly_Sales))), by = .(Store,Dept)]
   
   for (s in 1:n.store){
+    cat("Prediction 3, Store: ", store[s], "\n")
     for (d in 1:n.dept){
       if(sum(train$Dept==dept[d] & train$Store==store[s])!=0){
 
