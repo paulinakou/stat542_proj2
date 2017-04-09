@@ -1,0 +1,114 @@
+#remove data with more than 10% (also 50%) missing values
+library("foreach")
+library("randomForest")
+library("doParallel")
+library("doSNOW")
+
+# Create bins for vabiables with too many factors
+bins <- function(){
+  temp$loan_amnt <-cut(temp$loan_amnt, 50, include.lowest=T)
+  levels(temp$loan_amnt) <- rev(as.factor(c(1:50)))
+  #plot((temp$loan_amnt))
+  
+  temp$pub_rec <-cut(temp$pub_rec, 50, include.lowest=T)
+  levels(temp$pub_rec) <- rev(as.factor(c(1:50)))
+  
+  temp$funded_amnt <-cut(temp$funded_amnt, 50, include.lowest=T)
+  levels(temp$funded_amnt) <- rev(as.factor(c(1:50)))
+  
+  temp$funded_amnt_inv <-cut(temp$funded_amnt_inv, 50, include.lowest=T)
+  levels(temp$funded_amnt_inv) <- rev(as.factor(c(1:50)))
+  
+  temp$int_rate<-cut(temp$int_rate, 50, include.lowest=T)
+  levels(temp$int_rate) <- rev(as.factor(c(1:50)))
+  
+  temp$installment<-cut(temp$installment, 50, include.lowest=T)
+  levels(temp$installment) <- rev(as.factor(c(1:50)))
+  
+  temp$annual_inc<-cut(temp$annual_inc, 50, include.lowest=T)
+  levels(temp$annual_inc) <- rev(as.factor(c(1:50)))
+  
+  temp$dti<-cut(temp$dti, 50, include.lowest=T)
+  levels(temp$dti) <- rev(as.factor(c(1:50)))
+  
+  temp$open_acc<-cut(temp$open_acc, 50, include.lowest=T)
+  levels(temp$open_acc) <- rev(as.factor(c(1:50)))
+  
+  temp$revol_bal<-cut(temp$revol_bal, 50, include.lowest=T)
+  levels(temp$revol_bal) <- rev(as.factor(c(1:50)))
+  
+  temp$revol_util<-cut(temp$revol_util, 50, include.lowest=T)
+  levels(temp$revol_util) <- rev(as.factor(c(1:50)))
+  
+  temp$total_acc<-cut(temp$total_acc, 50, include.lowest=T)
+  levels(temp$total_acc) <- rev(as.factor(c(1:50)))
+  
+  temp$out_prncp<-cut(temp$out_prncp, 50, include.lowest=T)
+  levels(temp$out_prncp) <- rev(as.factor(c(1:50)))
+  
+  temp$total_pymnt<-cut(temp$total_pymnt, 50, include.lowest=T)
+  levels(temp$total_pymnt) <- rev(as.factor(c(1:50)))
+  
+  
+  temp$total_rec_prncp<-cut(temp$total_rec_prncp, 50, include.lowest=T)
+  levels(temp$total_rec_prncp) <- rev(as.factor(c(1:50)))
+  
+  temp$total_rec_late_fee<-cut(temp$total_rec_late_fee, 50, include.lowest=T)
+  levels(temp$total_rec_late_fee) <- rev(as.factor(c(1:50)))
+  
+  temp$recoveries<-cut(temp$recoveries, 50, include.lowest=T)
+  levels(temp$recoveries) <- rev(as.factor(c(1:50)))
+  
+  temp$collection_recovery_fee<-cut(temp$collection_recovery_fee, 50, include.lowest=T)
+  levels(temp$collection_recovery_fee) <- rev(as.factor(c(1:50)))
+  
+  temp$last_pymnt_amnt<-cut(temp$last_pymnt_amnt, 50, include.lowest=T)
+  levels(temp$last_pymnt_amnt) <- rev(as.factor(c(1:50)))
+  
+  temp$tot_coll_amt<-cut(temp$tot_coll_amt, 50, include.lowest=T)
+  levels(temp$tot_coll_amt) <- rev(as.factor(c(1:50)))
+  
+  temp$tot_cur_bal<-cut(temp$tot_cur_bal, 50, include.lowest=T)
+  levels(temp$tot_cur_bal) <- rev(as.factor(c(1:50)))
+  
+  temp$total_rev_hi_lim<-cut(temp$total_rev_hi_lim, 50, include.lowest=T)
+  levels(temp$total_rev_hi_lim) <- rev(as.factor(c(1:50)))
+}
+
+temp2<- train[-which(sapply(train, function(x) (sum(is.na(x))/length(x)>0.1)))]
+temp <- na.omit(temp2)
+#remove some factors
+temp<-temp[-c(1,2,11,16,19,20,22,23,27,44,46,47)]
+#remove current loans
+current_id <- which(train_temp$loan_status =="Current")
+train_temp <- train_temp[-current_id,]
+temp$loan_status <- factor(temp$loan_status) 
+
+## set the seed to make your partition reproductible
+set.seed(123)
+train_ind <- sample(seq_len(nrow(temp)), size = floor(0.75 * nrow(temp)))
+
+train_temp <- temp[train_ind, ]
+test_temp <- temp[-train_ind, ]
+
+bins()
+
+
+start.time <- Sys.time()
+
+#Train Random Forest
+start.time <- Sys.time()
+fit = randomForest(train_temp[,-13], train_temp$loan_status, ntree=500, importance=TRUE)
+end.time <- Sys.time()
+time.taken <- round(end.time - start.time,2)
+time.taken
+
+prediction <- predict(fit,test_temp,type="prob")
+
+probabilities <- prediction[,1]+prediction[,2]+prediction[,6]+prediction[,7]
+
+y_value <- (test_temp$loan_status %in% c("Default", "In Grace Period", "Late (16-30 days)", "Late (31-120 days)", "Does not meet the credit policy. Status:Charged Off"))
+
+prob_fix <- sapply(probabilities, function(x) max(min(x, 1-10^(-15)),10^(-15)))
+loss <- -(1/nrow(test_temp))*sum(y_value*log(prob_fix)+(1-y_value)*log(1-prob_fix))
+loss
