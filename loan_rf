@@ -3,6 +3,7 @@ library("foreach")
 library("randomForest")
 library("doParallel")
 library("doSNOW")
+train = read.csv("loan.csv")
 
 # Create bins for vabiables with too many factors
 bins <- function(){
@@ -80,9 +81,8 @@ temp <- na.omit(temp2)
 #remove some factors
 temp<-temp[-c(1,2,11,16,19,20,22,23,27,44,46,47)]
 #remove current loans
-current_id <- which(train_temp$loan_status =="Current")
-train_temp <- train_temp[-current_id,]
-temp$loan_status <- factor(temp$loan_status) 
+
+
 
 ## set the seed to make your partition reproductible
 set.seed(123)
@@ -93,8 +93,9 @@ test_temp <- temp[-train_ind, ]
 
 bins()
 
-
-start.time <- Sys.time()
+current_id <- which(train_temp$loan_status =="Current")
+train_temp <- train_temp[-current_id,]
+train_temp$loan_status <- factor(train_temp$loan_status) 
 
 #Train Random Forest
 start.time <- Sys.time()
