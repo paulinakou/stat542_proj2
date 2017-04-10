@@ -93,7 +93,7 @@ levels(y)[levels(y)=="Issued"] <- "0"
 temp$loan_status <- y
 
 #Train Random Forest
-fit = randomForest(temp[,-13], temp$loan_status, ntree=600, importance=TRUE)
+fit = randomForest(temp[,-13], temp$loan_status, ntree=700, importance=TRUE)
 
 prediction <- predict(fit,test,type="prob")
 
