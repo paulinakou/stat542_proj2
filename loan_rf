@@ -89,7 +89,6 @@ levels(y)[levels(y)=="Charged Off"] <- "1"
 levels(y)[levels(y)=="Late (16-30 days)"] <- "1"
 levels(y)[levels(y)=="Late (31-120 days)"] <- "1"
 levels(y)[levels(y)=="Fully Paid"] <- "0"
-levels(y)[levels(y)=="Current"] <- "0"
 levels(y)[levels(y)=="In Grace Period"] <- "0"
 levels(y)[levels(y)=="Issued"] <- "0"
 temp$loan_status <- y
